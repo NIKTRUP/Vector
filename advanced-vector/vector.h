@@ -87,14 +87,6 @@ private:
     size_t capacity_ = 0;
 };
 
-/** Для ревьюера:
-   Добрый день! Появилось пару вопросов:
- - Стоит ли разбить класс Vector на .hpp и .cpp файлы ? Если нет, то почему ? 
- - Стоит ли оставлять PushBack и EmplaceBack c передачей по forward ссылке,
-    или надо бы разбить на передачу по rvalue-ссылке и константной ?
-    P.S: Спасибо за работу !
- */
-
 template <typename T>
 class Vector {
 public:
@@ -203,7 +195,7 @@ public:
 
     template <typename... Args>
     iterator Emplace(const_iterator pos, Args&&... args){
-
+        assert(pos >= begin() && pos <= end());
         if (pos == end()) {
             return &EmplaceBack(std::forward<Args>(args)...);
         }
@@ -240,7 +232,7 @@ public:
     }
 
     iterator Erase(const_iterator pos) noexcept(std::is_nothrow_move_assignable_v<T>) {
-        assert(size_ > 0);
+        assert(pos >= begin() && pos < end());
         auto pos_idx = static_cast<size_t>(pos - begin());
         std::move(begin() + pos_idx + 1, end(), begin() + pos_idx);
         data_[size_ - 1].~T();
@@ -272,6 +264,7 @@ public:
     }
 
     void PopBack() noexcept {
+        assert(size_ > 0);
         std::destroy_at(data_ + size_ - 1);
         --size_;
     }
